@@ -9,7 +9,7 @@ dispatcher() ->
   Path = prometheus_rabbitmq_exporter_config:path(),
   Registry = default,
 
-  prometheus_http:setup(),
+  prometheus_httpd:start(),
 
   [{Path, prometheus_rabbitmq_exporter_handler, {Registry}}].
 web_ui()     -> [].

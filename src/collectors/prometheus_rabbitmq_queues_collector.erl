@@ -20,26 +20,14 @@
 -behaviour(prometheus_collector).
 
 
--define(METRIC_NAME_PREFIX, "rabbitmq_queue_").
+-define(QUEUE_METRIC_NAME_PREFIX, "rabbitmq_queue_").
 
--define(METRIC_NAME(S), ?METRIC_NAME_PREFIX ++ atom_to_list(S)).
+-define(QUEUE_METRIC_NAME(S), ?QUEUE_METRIC_NAME_PREFIX ++ atom_to_list(S)).
 
--define(METRICS, [{durable, boolean, "Whether or not the queue survives server restarts."},
-                  {auto_delete, boolean, "Whether the queue will be deleted automatically when no longer used."},
-                  {exclusive, boolean, "True if queue is exclusive (i.e. has owner_pid), false otherwise."},
-                  {messages_ready, gauge, "Number of messages ready to be delivered to clients."},
-                  {messages_unacknowledged, gauge, "Number of messages delivered to clients but not yet acknowledged."},
-                  {messages, gauge, "Sum of ready and unacknowledged messages (queue depth)."},
-                  {messages_ready_ram, gauge, "Number of messages from messages_ready which are resident in ram."},
-                  {messages_unacknowledged_ram, gauge, "Number of messages from messages_unacknowledged which are resident in ram."},
+-define(METRICS, [{messages, gauge, "Sum of ready and unacknowledged messages (queue depth)."},
                   {messages_ram, gauge, "Total number of messages which are resident in ram."},
-                  {messages_persistent, gauge, "Total number of persistent messages in the queue (will always be 0 for transient queues)."},
                   {message_bytes, gauge, "Sum of the size of all message bodies in the queue. This does not include the message properties (including headers) or any overhead."},
-                  {message_bytes_ready, gauge, "Like message_bytes but counting only those messages ready to be delivered to clients."},
-                  {message_bytes_unacknowledged, gauge, "Like message_bytes but counting only those messages delivered to clients but not yet acknowledged."},
                   {message_bytes_ram, gauge, "Like message_bytes but counting only those messages which are in RAM."},
-                  {message_bytes_persistent, gauge, "Like message_bytes but counting only those messages which are persistent."},
-                  {head_message_timestamp, gauge, "The timestamp property of the first message in the queue, if present. Timestamps of messages only appear when they are in the paged-in state."},
                   {disk_reads, counter, "Total number of times messages have been read from disk by this queue since it started."},
                   {disk_writes, counter, "Total number of times messages have been written to disk by this queue since it started."},
                   {disk_size_bytes, gauge, "Disk space occupied by the queue.",
@@ -94,7 +82,7 @@ mf(Callback, Metric, Queues) ->
                               {Key, Type1, Help1, Fun1} ->
                                 {Key, Type1, Help1, Fun1}
                             end,
-  Callback(create_mf(?METRIC_NAME(Name), Help, catch_boolean(Type), ?MODULE, {Type, Fun, Queues})).
+  Callback(create_mf(?QUEUE_METRIC_NAME(Name), Help, catch_boolean(Type), ?MODULE, {Type, Fun, Queues})).
 
 
 %% messages_stat
@@ -134,7 +122,7 @@ catch_boolean(boolean) ->
          T.
 
 collect_messages_stat(Callback, AllQueues, MessagesStat) ->
-  [Callback(create_counter(?METRIC_NAME(MetricName), Help, {messages_stat, MSKey, AllQueues}))
+  [Callback(create_counter(?QUEUE_METRIC_NAME(MetricName), Help, {messages_stat, MSKey, AllQueues}))
    || {MSKey, MetricName, Help} <- prometheus_rabbitmq_message_stats:metrics(), lists:member(MetricName, MessagesStat)].
 
 emit_counter_metric_if_defined(Labels, Value) ->

@@ -39,9 +39,9 @@
                         rabbit_user_permission,
                         rabbit_vhost]).
 
--define(METRIC_NAME_PREFIX, "rabbitmq_mnesia_table_").
+-define(TABLES_METRIC_NAME_PREFIX, "rabbitmq_mnesia_table_").
 
--define(METRIC_NAME(S), ?METRIC_NAME_PREFIX ++ atom_to_list(S)).
+-define(TABLES_METRIC_NAME(S), ?TABLES_METRIC_NAME_PREFIX ++ atom_to_list(S)).
 
 %% metric {Key, Type, Help, &optional Fun}
 -define(METRICS, [{read_only, untyped, "Access mode of the table, 1 if table is read_only or 0 otherwise.",
@@ -111,7 +111,7 @@ mf(Callback, Metric, Tables) ->
                                 {Key, Type1, Help1, Fun1} ->
                                   {Key, Type1, Help1, Fun1}
                             end,
-  Callback(create_mf(?METRIC_NAME(Name), Help, Type, ?MODULE, {Type, Fun, Tables})).
+  Callback(create_mf(?TABLES_METRIC_NAME(Name), Help, Type, ?MODULE, {Type, Fun, Tables})).
 
 
 collect_metrics(_, {Type, Fun, Tables}) ->
